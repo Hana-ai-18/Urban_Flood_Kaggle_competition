@@ -1,0 +1,106 @@
+# Cấu hình chính cho UrbanFloodBench
+
+# Đường dẫn dữ liệu
+data:
+  data_root: "data/Models"
+  output_dir: "./outputs"
+  checkpoint_dir: "./checkpoints"
+  
+  # Các mô hình địa hình
+  models:
+    - 1
+    - 2
+  
+  # Số bước thời gian khởi động (spin-up)
+  spinup_steps: 10
+  
+  # Tỷ lệ train/val
+  train_val_split: 0.8
+
+# Cấu hình model
+model:
+  type: "temporal_gnn"  # temporal_gnn, lstm_gnn, transformer_gnn
+  
+  # Node feature dimensions
+  node_1d_static_dim: 6
+  node_2d_static_dim: 9
+  edge_1d_static_dim: 7
+  edge_2d_static_dim: 5
+  
+  node_1d_dynamic_dim: 2
+  node_2d_dynamic_dim: 3
+  edge_1d_dynamic_dim: 2
+  edge_2d_dynamic_dim: 2
+  
+  # Model architecture
+  hidden_dim: 128
+  num_gnn_layers: 3
+  num_temporal_layers: 2
+  dropout: 0.1
+  
+  # Temporal settings
+  sequence_length: 10
+  prediction_horizon: 1  # Autoregressive: predict 1 step ahead
+  
+  # GNN type
+  gnn_type: "GAT"  # GCN, GAT, GraphSAGE
+
+# Training
+training:
+  batch_size: 4
+  num_epochs: 100
+  learning_rate: 0.001
+  weight_decay: 1e-5
+  
+  # Optimizer
+  optimizer: "AdamW"
+  scheduler: "ReduceLROnPlateau"
+  patience: 10
+  factor: 0.5
+  
+  # Early stopping
+  early_stopping_patience: 20
+  
+  # Gradient clipping
+  gradient_clip: 1.0
+  
+  # Mixed precision
+  use_amp: true
+
+# Loss function
+loss:
+  type: "standardized_mse"  # mse, mae, huber, standardized_mse
+  
+  # Standardization values (from competition)
+  std_devs:
+    model_1:
+      node_type_1: 16.877747
+      node_type_2: 14.378797
+    model_2:
+      node_type_1: 3.191784
+      node_type_2: 2.727131
+
+# Inference
+inference:
+  autoregressive: true
+  num_predictions: null  # null = predict all timesteps after spinup
+  
+# Ensemble
+ensemble:
+  use_ensemble: true
+  models:
+    - "temporal_gnn"
+    - "lstm_gnn"
+    - "transformer_gnn"
+  weights: [0.4, 0.3, 0.3]
+
+# Logging
+logging:
+  use_wandb: false
+  project_name: "urban_flood_bench"
+  log_interval: 10
+
+# Device
+device: "cuda"  # cuda or cpu
+seed: 42
+num_workers: 4
